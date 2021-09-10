@@ -74,8 +74,9 @@ truffle test
 ```
 // ensure you are inside the client directory when running this
 npm run test
-To build the application for production, use the build script. A production build will be in the client/build folder.
-
+```
+8. To build the application for production, use the build script. A production build will be in the client/build folder.
+```
 // ensure you are inside the client directory when running this
 npm run build
 ```
