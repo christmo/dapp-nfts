@@ -1,8 +1,9 @@
-import React, { Component } from "react";
-import SimpleStorageContract from "./contracts/SimpleStorage.json";
-import getWeb3 from "./getWeb3";
+import React, { Component } from 'react';
+import VolcanoTokenContract from './contracts/VolcanoToken.json';
+import getWeb3 from './getWeb3';
+import { NFTStorage, File } from 'nft.storage';
 
-import "./App.css";
+import './App.css';
 
 class App extends Component {
   state = { storageValue: 0, web3: null, accounts: null, contract: null };
@@ -17,11 +18,14 @@ class App extends Component {
 
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
-      const deployedNetwork = SimpleStorageContract.networks[networkId];
+      console.log(networkId);
+      const deployedNetwork = VolcanoTokenContract.networks[networkId];
       const instance = new web3.eth.Contract(
-        SimpleStorageContract.abi,
-        deployedNetwork && deployedNetwork.address,
+        VolcanoTokenContract.abi,
+        deployedNetwork && deployedNetwork.address
       );
+
+      console.log(await instance.methods.owner().call());
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
@@ -29,23 +33,52 @@ class App extends Component {
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
-        `Failed to load web3, accounts, or contract. Check console for details.`,
+        `Failed to load web3, accounts, or contract. Check console for details.`
       );
       console.error(error);
     }
   };
 
   runExample = async () => {
-    const { accounts, contract } = this.state;
-
+    const { web3, accounts, contract } = this.state;
+    const account = accounts[0];
+    const { owner, symbol, mint, getOwnership } = contract.methods;
+    console.log(contract.methods);
+    console.log(account);
+    console.log(await owner().call());
+    console.log(await symbol().call());
+    //await mint("hola").send({ from: account });
+    let o = await getOwnership(account).call();
+    console.log(o);
+    //this.uploadNFT('Pinpie','Pin is not delicious beef!');
+    //let mi = await mint("http://demo.com").send({ from: this.account });
     // Stores a given value, 5 by default.
-    await contract.methods.set(5).send({ from: accounts[0] });
+    //await contract.methods.set(5).send({ from: accounts[0] });
 
     // Get the value from the contract to prove it worked.
-    const response = await contract.methods.get().call();
+    //const response = await contract.methods.owner();
+    //console.log(await response.call());
 
     // Update state with the result.
-    this.setState({ storageValue: response });
+    //this.setState({ storageValue: response });
+  };
+
+  uploadNFT = async (name, description) => {
+    const apiKey = '<API KEY>';
+    const client = new NFTStorage({ token: apiKey });
+
+    const metadata = await client.store({
+      name: name,
+      description: description,
+      image: new File(
+        [
+          /* data */
+        ],
+        'pinpie.jpg',
+        { type: 'image/jpg' }
+      )
+    });
+    console.log(metadata.url);
   };
 
   render() {
@@ -54,7 +87,7 @@ class App extends Component {
     }
     return (
       <div className="App">
-        <h1>Good to Go!</h1>
+        <h1>NFT Exchange</h1>
         <p>Your Truffle Box is installed and ready.</p>
         <h2>Smart Contract Example</h2>
         <p>
@@ -64,7 +97,9 @@ class App extends Component {
         <p>
           Try changing the value stored on <strong>line 42</strong> of App.js.
         </p>
-        <div>The stored value is: {this.state.storageValue}</div>
+        <div>
+          The stored value is: {this.state.storageValue}
+        </div>
       </div>
     );
   }

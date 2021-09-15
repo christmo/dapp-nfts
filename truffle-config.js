@@ -1,10 +1,10 @@
-require('dotenv').config()
-const HDWalletProvider = require('truffle-hdwallet-provider')
-const MNEMONIC = process.env.MNEMONIC
-const ROPSTEN_URL = process.env.ROPSTEN_URL
-const KOVAN_URL = process.env.KOVAN_URL
-const RINKEBY_URL = process.env.RINKEBY_URL
-const MAINNET_URL = process.env.MAINNET_URL
+require('dotenv').config();
+const HDWalletProvider = require('truffle-hdwallet-provider');
+const MNEMONIC = process.env.MNEMONIC;
+const ROPSTEN_URL = process.env.ROPSTEN_URL;
+const KOVAN_URL = process.env.KOVAN_URL;
+const RINKEBY_URL = process.env.RINKEBY_URL;
+const MAINNET_URL = process.env.MAINNET_URL;
 
 /**
  * Use this file to configure your truffle project. It's seeded with some
@@ -50,32 +50,32 @@ module.exports = {
     // tab if you use this network and you must also set the `host`, `port` and `network_id`
     // options below to some value.
     //
-    develop: {
-     host: "127.0.0.1",     // Localhost (default: none)
-     port: 8545,            // Standard Ethereum port (default: none)
-     network_id: "*",       // Any network (default: none)
+    development: {
+      host: '127.0.0.1', // Localhost (default: none)
+      port: 8545, // Standard Ethereum port (default: none)
+      network_id: '*' // Any network (default: none)
     },
-    
+
     develop: {
       port: 8545
     },
 
     ropsten: {
-        provider: () => new HDWalletProvider(MNEMONIC, ROPSTEN_URL),
-        network_id: 3
+      provider: () => new HDWalletProvider(MNEMONIC, ROPSTEN_URL),
+      network_id: 3
     },
     kovan: {
-        provider: () => new HDWalletProvider(MNEMONIC, KOVAN_URL),
-        network_id: 42
+      provider: () => new HDWalletProvider(MNEMONIC, KOVAN_URL),
+      network_id: 42
     },
     rinkeby: {
-        provider: () => new HDWalletProvider(MNEMONIC, RINKEBY_URL),
-        network_id: 4
+      provider: () => new HDWalletProvider(MNEMONIC, RINKEBY_URL),
+      network_id: 4
     },
     // main ethereum network(mainnet)
     mainnet: {
-        provider: () => new HDWalletProvider(MNEMONIC, MAINNET_URL),
-        network_id: 1
+      provider: () => new HDWalletProvider(MNEMONIC, MAINNET_URL),
+      network_id: 1
     }
 
     // Another network with more advanced options...
@@ -115,7 +115,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: ">0.8.0",    // Fetch exact version from solc-bin (default: truffle's version)
+      version: '>0.8.0' // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       // settings: {          // See the solidity docs for advice about optimization and evmVersion
       //  optimizer: {
@@ -126,4 +126,4 @@ module.exports = {
       // }
     }
   }
-}
+};

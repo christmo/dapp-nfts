@@ -8,7 +8,11 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract VolcanoToken is Ownable, ERC721("Token NFT Christian Mora", "VTCM") {
     uint256 public tokenId = 1;
+
     mapping(address => Metadata[]) public ownership;
+    mapping(uint256 => uint256) public tokenIdToPrice;
+
+    event NftBought(address _seller, address _buyer, uint256 _price);
 
     struct Metadata {
         uint256 timestamp;
@@ -60,19 +64,31 @@ contract VolcanoToken is Ownable, ERC721("Token NFT Christian Mora", "VTCM") {
         ownership[_owner] = array;
     }
 
-    function transfer(address _to, uint256 _tokenId) public {
-        setApprovalForAll(_to, true);
-        safeTransferFrom(_msgSender(), _to, _tokenId);
-        _transferOwnership(_to, _tokenId);
+    function transfer(
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) public {
+        require(
+            _from == ERC721.ownerOf(_tokenId),
+            "Only Token owner can transfer ownership the token"
+        );
+
+        safeTransferFrom(_from, _to, _tokenId);
+        _transferOwnership(_from, _to, _tokenId);
     }
 
-    function _transferOwnership(address _to, uint256 _tokenId) internal {
+    function _transferOwnership(
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) internal {
         require(_to != address(0), "Cannot transfer ownership to 0x0");
         require(
             _to == ERC721.ownerOf(_tokenId),
             "Only Token owner can transfer ownership the token"
         );
-        Metadata[] storage arrayFrom = ownership[_msgSender()];
+        Metadata[] storage arrayFrom = ownership[_from];
         Metadata[] storage arrayTo = ownership[_to];
         uint256 j = 0;
         for (uint256 i = 0; i < arrayFrom.length; i++) {
@@ -85,6 +101,34 @@ contract VolcanoToken is Ownable, ERC721("Token NFT Christian Mora", "VTCM") {
         }
         arrayFrom.pop();
         ownership[_to] = arrayTo;
-        ownership[_msgSender()] = arrayFrom;
+        ownership[_from] = arrayFrom;
+    }
+
+    function allowBuy(uint256 _tokenId, uint256 _price) external {
+        require(
+            _msgSender() == ERC721.ownerOf(_tokenId),
+            "Not owner of this token"
+        );
+        require(_price > 0, "Price zero");
+        tokenIdToPrice[_tokenId] = _price;
+    }
+
+    function disallowBuy(uint256 _tokenId) external {
+        require(_msgSender() == ownerOf(_tokenId), "Not owner of this token");
+        tokenIdToPrice[_tokenId] = 0;
+    }
+
+    function buy(uint256 _tokenId) external payable {
+        uint256 price = tokenIdToPrice[_tokenId];
+        require(price > 0, "This token is not for sale");
+        require(msg.value == price, "Incorrect value");
+        address buyer = _msgSender();
+        address seller = ownerOf(_tokenId);
+        require(buyer != seller, "Seller cannot be the buyer");
+        transfer(seller, buyer, _tokenId);
+        tokenIdToPrice[_tokenId] = 0; // not for sale anymore
+        payable(seller).transfer(msg.value); // send the ETH to the seller
+
+        emit NftBought(seller, buyer, msg.value);
     }
 }
