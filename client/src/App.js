@@ -64,7 +64,7 @@ class App extends Component {
   };
 
   uploadNFT = async (name, description) => {
-    const apiKey = '<API KEY>';
+    const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDZlYTIxM0EyMjIyOTExYTQzOGY5ZjRlODczMTg5YzAxMDZhQjRmMTgiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYzMTQwMzA1MzkwNywibmFtZSI6Im5mdHMifQ.QN7funmxlMLL8NGmYQJmW2-w8zVkClFD0qcAn4zC0i0';
     const client = new NFTStorage({ token: apiKey });
 
     const metadata = await client.store({

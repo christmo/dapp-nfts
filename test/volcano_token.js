@@ -48,7 +48,7 @@ contract('VolcanoToken', function(accounts) {
     assert.equal(metadata[3].tokenId, 4, 'Token Id minted');
   });
 
-  it('should burn two tokens NFT 3 and 1', async function() {
+  it('should burn one token NFT - 1', async function() {
     const contract = await VolcanoToken.deployed();
     const from = accounts[0];
 
@@ -175,5 +175,20 @@ contract('VolcanoToken', function(accounts) {
       balanceBuyerOut.toString(),
       'Buyer final balance'
     );*/
+  });
+
+  it('should show the marketcap global', async function() {
+    const contract = await VolcanoToken.deployed();
+    let marketCap = await contract.marketCap();
+    assert.equal(marketCap.toNumber(), 3, 'Token Owner is from address');
+  });
+
+  it('should show list tokens circulating', async function() {
+    const contract = await VolcanoToken.deployed();
+    let listTokens = await contract.getListTokensCirculating();
+    assert.equal(listTokens.length, 4, 'Token Owner is from address');
+    for (token in listTokens) {
+      assert.isNotTrue(token.tokenId == 1, "Token 1 is burnt");
+    }
   });
 });

@@ -8,6 +8,7 @@ module.exports = function(deployer) {
   fs.copyFile(
     process.cwd() + '/build/contracts/VolcanoToken.json',
     process.cwd() + '/client/src/contracts/VolcanoToken.json',
+//	process.cwd() + '/nextjs/pages/contracts/VolcanoToken.json',
     err => {
       if (err) throw err;
     }

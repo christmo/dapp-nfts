@@ -8,9 +8,11 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract VolcanoToken is Ownable, ERC721("Token NFT Christian Mora", "VTCM") {
     uint256 public tokenId = 1;
+    uint256 public marketCap = 0;
 
     mapping(address => Metadata[]) public ownership;
     mapping(uint256 => uint256) public tokenIdToPrice;
+    mapping(uint8 => VisualToken[]) listTokensCirculating; //Only used for visual porpuses
 
     event NftBought(address _seller, address _buyer, uint256 _price);
 
@@ -18,6 +20,11 @@ contract VolcanoToken is Ownable, ERC721("Token NFT Christian Mora", "VTCM") {
         uint256 timestamp;
         uint256 tokenId;
         string tokenURI;
+    }
+
+    struct VisualToken {
+        uint256 tokenId;
+        string tokenURL;
     }
 
     function getOwnership(address _user)
@@ -39,6 +46,8 @@ contract VolcanoToken is Ownable, ERC721("Token NFT Christian Mora", "VTCM") {
             })
         );
         ownership[_msgSender()] = tokens;
+        marketCap++;
+        listTokensCirculating[0].push(VisualToken(tokenId, uri));
         tokenId++;
     }
 
@@ -49,7 +58,18 @@ contract VolcanoToken is Ownable, ERC721("Token NFT Christian Mora", "VTCM") {
         );
         _burn(_tokenId);
         _remove(_msgSender(), _tokenId);
+        marketCap--;
+        for (uint256 i = 0; i < listTokensCirculating[0].length; i++) {
+            if (listTokensCirculating[0][i].tokenId == _tokenId) {
+                delete listTokensCirculating[0][i];
+				break;
+            }
+        }
     }
+
+	function getListTokensCirculating() public view returns (VisualToken[] memory){
+		return listTokensCirculating[0];
+	}
 
     function _remove(address _owner, uint256 _tokenId) internal onlyOwner {
         Metadata[] storage array = ownership[_owner];
