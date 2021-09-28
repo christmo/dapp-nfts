@@ -120,7 +120,7 @@ contract('VolcanoToken', function(accounts) {
     let tokenOwner = await contract.ownerOf(tokenId);
     assert.equal(tokenOwner, seller, 'Token Owner is from address');
 
-    await contract.allowBuy(tokenId, price, { from: seller });
+    await contract.allowBuy(tokenId, price, buyer, { from: seller });
 
     assert.equal(
       await contract.tokenIdToPrice(tokenId),
@@ -142,8 +142,8 @@ contract('VolcanoToken', function(accounts) {
     let owner = await contract.ownerOf(tokenToBuy);
     assert.equal(owner, seller, 'Token should be owned by seller');
 
-    await contract.setApprovalForAll(buyer, true, { from: seller });
-    await contract.approve(buyer, tokenToBuy, { from: seller });
+    //await contract.setApprovalForAll(buyer, true, { from: seller });
+    //await contract.approve(buyer, tokenToBuy, { from: seller });
     await contract.buy(tokenToBuy, {
       from: buyer,
       value: web3.utils.fromWei('10', 'wei')
@@ -190,5 +190,11 @@ contract('VolcanoToken', function(accounts) {
     for (token in listTokens) {
       assert.isNotTrue(token.tokenId == 1, "Token 1 is burnt");
     }
+  });
+
+  it('should get the list of tokens by address', async function() {
+    const contract = await VolcanoToken.deployed();
+	let ids = await contract.getOwnership(accounts[0]);
+    assert.equal(ids.length, 1, 'Token of address 0');
   });
 });

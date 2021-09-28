@@ -11,10 +11,12 @@ contract VolcanoToken is Ownable, ERC721("Token NFT Christian Mora", "VTCM") {
     uint256 public marketCap = 0;
 
     mapping(address => Metadata[]) public ownership;
+    //mapping(address => uint256[]) public tokenIdsByAddress;
     mapping(uint256 => uint256) public tokenIdToPrice;
     mapping(uint8 => VisualToken[]) listTokensCirculating; //Only used for visual porpuses
 
     event NftBought(address _seller, address _buyer, uint256 _price);
+    event NftMinted(address _owner, uint256 _tokenId);
 
     struct Metadata {
         uint256 timestamp;
@@ -25,6 +27,7 @@ contract VolcanoToken is Ownable, ERC721("Token NFT Christian Mora", "VTCM") {
     struct VisualToken {
         uint256 tokenId;
         string tokenURL;
+        address owner;
     }
 
     function getOwnership(address _user)
@@ -34,6 +37,14 @@ contract VolcanoToken is Ownable, ERC721("Token NFT Christian Mora", "VTCM") {
     {
         return ownership[_user];
     }
+
+    /*function getTokenIdsByAddress(address _user)
+        public
+        view
+        returns (uint256[] memory)
+    {
+        return tokenIdsByAddress[_user];
+    }*/
 
     function mint(string memory uri) public {
         _safeMint(_msgSender(), tokenId);
@@ -46,8 +57,10 @@ contract VolcanoToken is Ownable, ERC721("Token NFT Christian Mora", "VTCM") {
             })
         );
         ownership[_msgSender()] = tokens;
+        //tokenIdsByAddress[_msgSender()].push(tokenId);
         marketCap++;
-        listTokensCirculating[0].push(VisualToken(tokenId, uri));
+        listTokensCirculating[0].push(VisualToken(tokenId, uri, _msgSender()));
+        emit NftMinted(_msgSender(), tokenId);
         tokenId++;
     }
 
@@ -62,14 +75,18 @@ contract VolcanoToken is Ownable, ERC721("Token NFT Christian Mora", "VTCM") {
         for (uint256 i = 0; i < listTokensCirculating[0].length; i++) {
             if (listTokensCirculating[0][i].tokenId == _tokenId) {
                 delete listTokensCirculating[0][i];
-				break;
+                break;
             }
         }
     }
 
-	function getListTokensCirculating() public view returns (VisualToken[] memory){
-		return listTokensCirculating[0];
-	}
+    function getListTokensCirculating()
+        public
+        view
+        returns (VisualToken[] memory)
+    {
+        return listTokensCirculating[0];
+    }
 
     function _remove(address _owner, uint256 _tokenId) internal onlyOwner {
         Metadata[] storage array = ownership[_owner];
@@ -122,15 +139,32 @@ contract VolcanoToken is Ownable, ERC721("Token NFT Christian Mora", "VTCM") {
         arrayFrom.pop();
         ownership[_to] = arrayTo;
         ownership[_from] = arrayFrom;
+        _updateOwnerVisualToken(_tokenId, _to);
     }
 
-    function allowBuy(uint256 _tokenId, uint256 _price) external {
+    function _updateOwnerVisualToken(uint256 _tokenId, address _to) private {
+        VisualToken[] storage list = listTokensCirculating[0];
+        for (uint256 i = 0; i < list.length; i++) {
+            if (list[i].tokenId == _tokenId) {
+                VisualToken storage token = list[i];
+                token.owner = _to;
+                break;
+            }
+        }
+    }
+
+    function allowBuy(
+        uint256 _tokenId,
+        uint256 _price,
+        address buyer
+    ) external {
         require(
             _msgSender() == ERC721.ownerOf(_tokenId),
             "Not owner of this token"
         );
         require(_price > 0, "Price zero");
         tokenIdToPrice[_tokenId] = _price;
+        approve(buyer, _tokenId);
     }
 
     function disallowBuy(uint256 _tokenId) external {
@@ -140,8 +174,8 @@ contract VolcanoToken is Ownable, ERC721("Token NFT Christian Mora", "VTCM") {
 
     function buy(uint256 _tokenId) external payable {
         uint256 price = tokenIdToPrice[_tokenId];
-        require(price > 0, "This token is not for sale");
-        require(msg.value == price, "Incorrect value");
+        require(price > 0, "Token is not for sale");
+        //require(msg.value == price, "Price of token is not correct");
         address buyer = _msgSender();
         address seller = ownerOf(_tokenId);
         require(buyer != seller, "Seller cannot be the buyer");

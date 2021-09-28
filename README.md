@@ -80,3 +80,18 @@ npm run test
 // ensure you are inside the client directory when running this
 npm run build
 ```
+
+# Test Ganache
+
+```sh
+let accounts = await web3.eth.getAccounts()
+let contract = await VolcanoToken.deployed()
+let seller = accounts[0]
+let buyer = accounts[1]
+let txMint = await contract.mint('https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg',{ from: seller });
+let listTokens = await contract.getListTokensCirculating()
+let tokenId = 1;
+let txAllow = await contract.allowBuy(tokenId, 10, buyer, { from: seller });
+let txBuy = await contract.buy(tokenId, {from: buyer,value: web3.utils.fromWei('10', 'wei')});
+let tokenOwner = await contract.ownerOf(tokenId);
+```
